@@ -254,6 +254,107 @@ for fret in data["fret_geometry"]:
     print(f"Fret {fret['fret']} angle {fret['angle_deg']} degrees")
 ```
 
+## 🎸 Custom String Spacing Input
+
+You can control the **Y-axis layout** of the strings (distance between each string centerline) using either:
+- `--string-spacing` → a single uniform gap applied between all adjacent strings.
+- `--string-spacing-list` → a comma-separated list of custom gaps.
+- `--string-spacing-file` → a text file containing one gap per line.
+
+---
+
+### 🔹 1. `--string-spacing` (Uniform)
+Specifies one value applied between all strings.
+
+Example:
+```bash
+python3 fretboard_calc_patched.py \
+  --frets 24 \
+  --strings 6 \
+  --scale 25.5in \
+  --string-spacing 0.35in \
+  --svg board_uniform.svg
+```
+
+All 5 inter-string gaps are 0.35 inches.
+
+---
+
+### 🔹 2. `--string-spacing-list` (Inline Custom Values)
+Accepts a comma-separated list of S−1 gaps (where S = number of strings).  
+Each value may include a unit (`in` or `mm`).
+
+Example:
+```bash
+python3 fretboard_calc_patched.py \
+  --frets 24 \
+  --strings 8 \
+  --bass-scale 27in \
+  --treble-scale 25.5in \
+  --neutral-fret 7 \
+  --string-spacing-list "0.35in,0.35in,0.36in,0.36in,0.37in,0.37in,0.38in" \
+  --svg test_spacing_list.svg \
+  --stroke 0.02
+```
+
+---
+
+### 🔹 3. `--string-spacing-file` (File-Based Custom Values)
+Use a plain text file containing exactly **(strings − 1)** lines.  
+Each line defines the gap between one pair of adjacent strings.
+
+Example file: `spacing.txt`
+```
+0.35in
+0.35in
+0.36in
+0.36in
+0.37in
+0.37in
+0.38in
+```
+
+Run:
+```bash
+python3 fretboard_calc_patched.py \
+  --frets 24 \
+  --strings 8 \
+  --bass-scale 27in \
+  --treble-scale 25.5in \
+  --neutral-fret 7 \
+  --string-spacing-file spacing.txt \
+  --svg test_spacing_file.svg \
+  --stroke 0.02
+```
+
+✅ Expected output:
+```
+✅ SVG written to test_spacing_file.svg
+```
+
+---
+
+### 💡 Tips
+
+| Behavior | Explanation |
+|-----------|--------------|
+| Blank lines are ignored | Helpful when commenting or spacing visually |
+| Units are optional | If omitted, defaults to the unit selected by `--unit` |
+| Mixed units allowed | e.g., `9mm` and `0.35in` in the same file are fine |
+| Mismatched count errors | You must provide exactly S−1 lines for S strings |
+| File encoding | Must be UTF-8 or plain ASCII |
+
+---
+
+### Example Verification
+
+You can confirm spacing was applied correctly by checking the line:
+```
+**String Y positions (bass=0):** 0.000 | 0.350 | 0.700 | 1.060 | ...
+```
+printed in the Markdown output or within the JSON (`"string_y_positions"` field).
+
+
 ---
 
 ## 📜 License and Use
