@@ -752,35 +752,51 @@ def main():
     geometry = calculate_fret_geometry(all_positions, y_positions, args.neutral_fret)
     nut_width = parse_len_arg(args.nut_width, args.unit)
     bridge_width = parse_len_arg(args.bridge_width, args.unit)
-    # ----------------------------------------
-    # Bridge-angle normalization (optional)
-    # ----------------------------------------
+    # ------------------------------------------------------
+    # Optional bridge-angle normalization
+    # ------------------------------------------------------
     if args.normalize_scale and (args.target_bridge_angle is not None):
-        if args.strings < 2:
-            raise SystemExit("Bridge-angle normalization requires --strings >= 2.")
+        # Save current scales (from args or defaults)
+        Lb_current = 0.0
+        Lt_current = 0.0
+        if args.bass_scale:
+            Lb_current = parse_len_arg(args.bass_scale, args.unit)
+        elif args.scale:
+            Lb_current = parse_len_arg(args.scale, args.unit)
+        if args.treble_scale:
+            Lt_current = parse_len_arg(args.treble_scale, args.unit)
+        elif args.scale:
+            Lt_current = parse_len_arg(args.scale, args.unit)
 
-        Lb_current = scales[0]
-        Lt_current = scales[-1]
-
-        Lb_new, Lt_new = normalize_scales_for_bridge_angle(
-            Lb=Lb_current,
-            Lt=Lt_current,
-            neutral_fret=args.neutral_fret,
-            bridge_width=bridge_width,
-            target_bridge_angle_deg=args.target_bridge_angle,
-            mode=args.normalize_mode,
+        # Perform normalization
+        (Lb_new, Lt_new) = normalize_scales_for_bridge_angle(
+            Lb_current,
+            Lt_current,
+            args.neutral_fret,
+            parse_len_arg(args.bridge_width, args.unit),
+            args.target_bridge_angle,
+            args.normalize_mode,
         )
 
-        scales = interpolate_scales_for_strings(
-            args.strings, Lb_new, Lt_new, args.scale_map, args.scale_gamma
-        )
+        # ------------------------------------------------------
+        # 🎯 Normalization Summary Printout
+        # ------------------------------------------------------
+        old_delta = abs(Lt_current - Lb_current)
+        new_delta = abs(Lt_new - Lb_new)
+        print("\n🎯 Bridge normalization summary")
+        print(f"   Bass scale:   {Lb_current:.3f} → {Lb_new:.3f} {args.unit}")
+        print(f"   Treble scale: {Lt_current:.3f} → {Lt_new:.3f} {args.unit}")
+        print(f"   Fan delta:    {old_delta:.3f} → {new_delta:.3f} {args.unit}")
+        print(f"   Δ angle:      +{args.target_bridge_angle:.3f}° (relative)\n")
 
-        # Recompute per-string geometry with normalized scales
-        all_positions = [fret_positions_along_string(L, args.frets) for L in scales]
-        all_spacings = [fret_spacings_from_positions(pos) for pos in all_positions]
-        geometry = calculate_fret_geometry(
-            all_positions, y_positions, args.neutral_fret
-        )
+        # Update current scales for downstream geometry
+        Lb = Lb_new
+        Lt = Lt_new
+    else:
+        # Use provided or default scales
+        Lb = parse_len_arg(args.bass_scale or args.scale, args.unit)
+        Lt = parse_len_arg(args.treble_scale or args.scale, args.unit)
+
     corners = outline_corners(
         scales, all_positions, args.neutral_fret, nut_width, bridge_width, y_positions
     )
