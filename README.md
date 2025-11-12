@@ -103,6 +103,10 @@ This GUI is especially useful for **rapid iteration**, **visual confirmation**, 
 
 ---
 
+![alt text](img/gui.png "GUI Render")
+
+---
+
 ### 🧩 Features
 
 **Top Half:**
