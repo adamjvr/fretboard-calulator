@@ -90,6 +90,164 @@ The script can emit multiple outputs in a single run:
 
 ---
 
+---
+
+## 🖥️ Graphical User Interface — `fretboard_calc_gui.py`
+
+### 📘 Overview
+
+`fretboard_calc_gui.py` is a **PyQt6-based graphical frontend** for the `fretboard_calc.py` CLI tool.  
+It provides a **live, interactive environment** for designing fretboards visually — with all command-line parameters exposed as GUI controls.
+
+This GUI is especially useful for **rapid iteration**, **visual confirmation**, and **preset management** when experimenting with different multiscale configurations.
+
+---
+
+### 🧩 Features
+
+**Top Half:**
+- 🖼 **Live SVG Preview:** Renders the fretboard drawing in real-time using `QGraphicsView` and `QGraphicsSvgItem`.  
+- 🖱 **Interactive Controls:**
+  - Mouse wheel zoom centered at cursor.
+  - Middle-mouse pan, or *Space + Left-drag* pan.
+- 🔍 **Toolbar Controls:**
+  - Zoom In / Zoom Out / 100% / Fit to View
+  - Live zoom percentage display.
+  - Export buttons for SVG and CSV outputs.
+
+**Bottom Half:**
+- ⚙️ **All CLI Parameters as Input Fields:**
+  - Frets, strings, scale lengths, neutral fret, units, board widths, margins, datum angle, slot kerf, etc.
+  - Full support for string spacing modes: uniform, CSV list, or external file.
+- 💾 **Preset Manager:**
+  - Create, apply, update, or delete presets.
+  - Presets stored automatically in `~/.fretboard_gui_presets.json`.
+- 📊 **Numeric Table:**
+  - Displays live fret positions and spacings parsed from the CLI’s temporary JSON output.
+- 🧾 **Log Window:**
+  - Shows CLI command output, normalization summaries, and any error messages.
+
+---
+
+### 🧠 How It Works
+
+Internally, the GUI acts as a **smart wrapper** around the CLI script:
+
+1. Each time you modify a parameter, the GUI builds a full command-line argument list (just like you’d type in the terminal).
+2. The command is executed in a **background QThread** using Python’s `subprocess.run()`, so the interface never freezes.
+3. The CLI writes temporary preview files (`preview.svg` and `preview.json`) into a system temp directory.
+4. The GUI then:
+   - Loads the SVG into the live preview area.
+   - Parses the JSON into the numeric table.
+   - Displays stdout and stderr logs in the bottom panel.
+5. You can export the current SVG or CSV table to any chosen location at any time.
+
+---
+
+### ⚙️ Installation
+
+Install PyQt6 (and SVG support):
+
+```bash
+pip install PyQt6 PyQt6-QtSvg
+```
+
+Make sure `fretboard_calc_gui.py` is located **in the same directory** as `fretboard_calc.py`.
+
+---
+
+### 🚀 Launching the GUI
+
+From your project’s source folder:
+
+```bash
+python3 fretboard_calc_gui.py
+```
+
+When launched:
+
+* A window appears with a toolbar, SVG preview, and full control panel.
+* Auto-preview is **enabled by default** — the fretboard regenerates ~300 ms after changes.
+* You can toggle Auto Preview using the button at the bottom of the control column.
+
+---
+
+### 🧾 Files and Persistence
+
+| File                                    | Description                                                         |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| `~/.fretboard_gui_presets.json`         | Stores all user-defined presets                                     |
+| `~/.fretboard_gui_config.json`          | Remembers window geometry, auto-preview state, and last used preset |
+| `/tmp/fretboard_gui_*/preview.svg/json` | Temporary working files generated during live preview               |
+
+These are automatically managed — you can delete them safely if needed.
+
+---
+
+### 💡 Tips
+
+| Action                 | Shortcut or Control                          |
+| ---------------------- | -------------------------------------------- |
+| Zoom in/out            | Mouse wheel or toolbar buttons               |
+| Pan                    | Middle-mouse drag or Space + Left-drag       |
+| Fit preview            | Toolbar “Fit” button or “Fit Preview” button |
+| Export SVG             | Toolbar “Export SVG…”                        |
+| Export numeric table   | Toolbar “Export Table CSV…”                  |
+| Regenerate immediately | “Generate Now” button                        |
+| Toggle auto preview    | “Auto Preview: ON/OFF” button                |
+| Clear console log      | “Clear Log” button                           |
+
+---
+
+### 📄 Example Workflow
+
+1. Run `python3 fretboard_calc_gui.py`
+2. Choose preset **“8-String Fan (27 → 25.5”)”**
+3. Adjust parameters (e.g. neutral fret, margins, angle)
+4. Watch the SVG preview update automatically
+5. Use zoom/pan to inspect geometry
+6. Click **Export SVG…** to save a finalized design
+7. Optionally export the fret table via **Export Table CSV…**
+
+---
+
+### 🧰 Why Use the GUI?
+
+* No need to re-enter long command lines.
+* Instantly visualize scale, fan angle, and spacing effects.
+* Manage reusable configurations via presets.
+* Non-blocking — you can continue interacting while it computes.
+* Perfect companion for builders doing **rapid design iteration** before sending CAD files to CAM/CNC.
+
+---
+
+### ⚠️ Troubleshooting
+
+| Issue                         | Fix                                                           |
+| ----------------------------- | ------------------------------------------------------------- |
+| GUI won’t start               | Ensure `PyQt6` and `PyQt6-QtSvg` are installed                |
+| SVG preview blank             | Check for errors in the Log tab — usually a missing parameter |
+| Nothing regenerates           | Verify *Auto Preview* is ON or click *Generate Now*           |
+| `fretboard_calc.py` not found | Keep both scripts in the same directory                       |
+
+---
+
+### 🧩 Summary
+
+`fretboard_calc_gui.py` provides a **complete visual frontend** for `fretboard_calc.py`:
+
+* 🔁 Live SVG preview
+* ⚙️ Full parameter coverage
+* 💾 Presets & config persistence
+* 🧵 Threaded execution
+* 🧮 Numeric fret table output
+* 🧰 Export tools for SVG & CSV
+
+This makes it ideal for **professional luthiers, CNC designers, and anyone integrating fretboard design into digital fabrication workflows**.
+
+---
+
+
 ## 🧰 Command Line Arguments
 
 Run:
